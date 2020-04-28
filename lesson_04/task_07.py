@@ -23,13 +23,13 @@ if __name__ == '__main__':
     # 1. Факториал
     for i, el in enumerate(factorial_gen()):
         print(f"Факториал {i+1} = {el}")
-        if i == 14:
+        if i == 15 - 1:
             break
 
     print()
 
-    # 1. Фибоначчи
+    # 2. Фибоначчи
     for i, el in enumerate(fibo_gen()):
         print(f"Число Фибоначчи {i + 1} = {el}")
-        if i == 14:
+        if i == 15 - 1:
             break
