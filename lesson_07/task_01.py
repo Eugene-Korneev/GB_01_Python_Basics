@@ -33,7 +33,6 @@ class Matrix:
         return max_len
 
     def __add__(self, other):
-        other_size = other.get_size()
         other_values = other.get_values()
         if self.get_size() != other.get_size():
             raise ValueError("Error! Addition operation is not possible for different sized matrices")

@@ -12,17 +12,16 @@ from abc import ABC, abstractmethod
 
 
 class AbstractClothes(ABC):
+    def __init__(self, name):
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
+
     @property
     @abstractmethod
-    def _type(self):
-        pass
-
-    @abstractmethod
-    def name(self):
-        pass
-
-    @abstractmethod
-    def type(self):
+    def clothes_type(self):
         pass
 
     @abstractmethod
@@ -31,38 +30,22 @@ class AbstractClothes(ABC):
 
 
 class Coat(AbstractClothes):
-    _type = 'Пальто'
+    clothes_type = 'Пальто'
 
     def __init__(self, name, size):
-        self._name = name
+        super().__init__(name)
         self._size = size
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def type(self):
-        return self._type
 
     def calc_fabric_consumption(self):
         return self._size / 6.5 + 0.5
 
 
 class Suit(AbstractClothes):
-    _type = 'Костюм'
+    clothes_type = 'Костюм'
 
     def __init__(self, name, height):
-        self._name = name
+        super().__init__(name)
         self._height = height
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def type(self):
-        return self._type
 
     def calc_fabric_consumption(self):
         return 2 * self._height + 0.3
@@ -81,15 +64,15 @@ class AllClothes:
 
 
 light_coat = Coat("Лёгкое осеннее пальто", 30)
-print(f"Название: {light_coat.name}, тип: {light_coat.type},\n"
+print(f"Название: {light_coat.name}, тип: {light_coat.clothes_type},\n"
       f"Ткани затрачено на производство: {light_coat.calc_fabric_consumption():.2f} м.\n")
 
 winter_coat = Coat("Тёплое зимнее пальто", 30)
-print(f"Название: {winter_coat.name}, тип: {winter_coat.type},\n"
+print(f"Название: {winter_coat.name}, тип: {winter_coat.clothes_type},\n"
       f"Ткани затрачено на производство: {winter_coat.calc_fabric_consumption():.2f} м.\n")
 
 business_suit = Suit("Деловой костюм", 1.90)
-print(f"Название: {business_suit.name}, тип: {business_suit.type},\n"
+print(f"Название: {business_suit.name}, тип: {business_suit.clothes_type},\n"
       f"Ткани затрачено на производство: {business_suit.calc_fabric_consumption():.2f} м.\n")
 
 all_clothes = AllClothes()
