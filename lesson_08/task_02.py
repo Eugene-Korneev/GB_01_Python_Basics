@@ -8,23 +8,17 @@ class MyZeroDivisionError(Exception):
     pass
 
 
-class MyInt(int):
-    def __init__(self, value):
-        super(MyInt, self).__init__()
-        self._value = value
-
-    def __truediv__(self, other):
-        if other == 0:
-            raise MyZeroDivisionError
-        return self._value / other
-
-
 user_input = [10, 100, 0, -5, -10]
-dividend = MyInt(100)
 
 for num in user_input:
-    print(f"Делю {dividend} на {num}")
+    print(f"Делю 100 на {num}")
     try:
-        print(f"Результат: {dividend / num}")
+        if num == 0:
+            raise MyZeroDivisionError
+        result = 100 / num
     except MyZeroDivisionError:
         print(f"Ошибка: на ноль делить нельзя")
+    except Exception as e:
+        print(e)
+    else:
+        print(f"Результат: {result}")
