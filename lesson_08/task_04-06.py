@@ -13,7 +13,7 @@
 # Подсказка: постарайтесь по возможности реализовать в проекте «Склад оргтехники» максимум возможностей,
 # изученных на уроках по ООП.
 
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 class WrongEquipmentTypeError(Exception):
@@ -29,6 +29,8 @@ class WrongQuantityTypeError(Exception):
 
 
 class AbstractOfficeEquipment(ABC):
+    equipment_type: str
+
     def __init__(self, brand, model, serial_number):
         self._model = model
         self._brand = brand
@@ -49,11 +51,6 @@ class AbstractOfficeEquipment(ABC):
     @property
     def serial_number(self):
         return self._serial_number
-
-    @property
-    @abstractmethod
-    def equipment_type(self):
-        pass
 
 
 class Scanner(AbstractOfficeEquipment):
@@ -138,7 +135,7 @@ class AbstractEquipmentWarehouse(ABC):
             print(f"Ошибка: {e}")
             return
         if quantity < 1:
-            print("Ошибка: количества не может быть меньше 1. Перемещение невозможно")
+            print("Ошибка: количество не может быть меньше 1. Перемещение невозможно")
             return
 
         if serial_number is not None:
@@ -164,6 +161,8 @@ class AbstractEquipmentWarehouse(ABC):
         if department.add(to_move):
             for i in to_delete:
                 del self._equipment[equipment_type][i]
+            if not self._equipment[equipment_type]:
+                del self._equipment[equipment_type]
             print("Перемещение завершено успешно")
 
     def show_warehouse_equipment(self):
@@ -179,7 +178,7 @@ class AbstractEquipmentWarehouse(ABC):
                       f"серийный номер: {d.serial_number}")
             total_qty += len(devices)
             print(f"Итого техники типа '{equipment_type}': {len(devices)} шт.")
-        print(f"Итого техники типа на складе: {total_qty} шт.")
+        print(f"Итого техники на складе: {total_qty} шт.")
 
 
 class MainWarehouse(AbstractEquipmentWarehouse):
