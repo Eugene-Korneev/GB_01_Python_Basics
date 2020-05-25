@@ -29,10 +29,14 @@ class WrongQuantityTypeError(Exception):
 
 
 class AbstractOfficeEquipment(ABC):
-    def __init__(self, model, brand, serial_number):
+    def __init__(self, brand, model, serial_number):
         self._model = model
         self._brand = brand
         self._serial_number = serial_number
+
+    # to depress pycharm warning
+    def __iter__(self):
+        pass
 
     @property
     def brand(self):
@@ -97,16 +101,17 @@ class AbstractEquipmentWarehouse(ABC):
         :return: bool
         """
 
+        print(f"\nПроизвожу добавление техники на склад '{self._warehouse_name}'")
         if isinstance(item, AbstractOfficeEquipment):
             item = [item]
         try:
             self._validate_office_equipment(item)
         except WrongEquipmentTypeError:
             print(f"Ошибка: неправильный тип данных техники. "
-                  f"Не могу добавить технику на склад '{self._warehouse_name}'")
+                  f"Не могу добавить технику на склад")
             return False
 
-        print(f"\nНа склад '{self._warehouse_name}' добавлены слеующие единицы техники:")
+        print(f"На склад '{self._warehouse_name}' добавлены слеующие единицы техники:")
         for d in item:
             self._equipment.setdefault(d.equipment_type, []).append(d)
             print(f"{d.equipment_type} {d.brand} {d.model}, серийный номер: {d.serial_number}")
@@ -119,6 +124,7 @@ class AbstractEquipmentWarehouse(ABC):
         Если не введён серийный номер, ищем указанное количиство техники с подходящими параметрами
         """
 
+        print(f"\nПроизвожу перемещение техники со склада '{self._warehouse_name}'")
         try:
             self._validate_department(department)
             self._validate_quantity(quantity)
@@ -135,7 +141,6 @@ class AbstractEquipmentWarehouse(ABC):
             print("Ошибка: количества не может быть меньше 1. Перемещение невозможно")
             return
 
-        print("Перемещаю технику со склада")
         if serial_number is not None:
             quantity = 1
         to_move = []
@@ -143,9 +148,9 @@ class AbstractEquipmentWarehouse(ABC):
 
         for i, item in enumerate(self._equipment[equipment_type]):
             if (
-                    brand is None or item.brand == brand and
-                    model is None or item.model == model and
-                    serial_number is None or item.serial_number == serial_number
+                    (brand is None or item.brand == brand) and
+                    (model is None or item.model == model) and
+                    (serial_number is None or item.serial_number == serial_number)
             ):
                 to_move.append(item)
                 to_delete.append(i)
@@ -162,17 +167,19 @@ class AbstractEquipmentWarehouse(ABC):
             print("Перемещение завершено успешно")
 
     def show_warehouse_equipment(self):
-        print(f"\nТовары на складе {self._warehouse_name}:")
+        print(f"\nТехника на складе '{self._warehouse_name}':")
         if not len(self._equipment.values()):
             print("Склад пуст")
             return
 
+        total_qty = 0
         for equipment_type, devices in self._equipment.items():
             for d in devices:
                 print(f"{d.equipment_type} {d.brand} {d.model}, "
                       f"серийный номер: {d.serial_number}")
+            total_qty += len(devices)
             print(f"Итого техники типа '{equipment_type}': {len(devices)} шт.")
-        print(f"Итого техники типа на складе: {len(self._equipment.values())} шт.")
+        print(f"Итого техники типа на складе: {total_qty} шт.")
 
 
 class MainWarehouse(AbstractEquipmentWarehouse):
@@ -181,13 +188,16 @@ class MainWarehouse(AbstractEquipmentWarehouse):
         Списание техники со склада
         """
 
-        for i, item in enumerate(self._equipment[equipment_type]):
+        print(f"\nПроизвожу списание со склада '{self._warehouse_name}':")
+        for i, item in enumerate(self._equipment.get(equipment_type, [])):
             if item.brand == brand and item.model == model and item.serial_number == serial_number:
                 del self._equipment[equipment_type][i]
+                if not self._equipment[equipment_type]:
+                    del self._equipment[equipment_type]
                 print(f"Произведено списание со склада: "
                       f"{equipment_type} {brand} {model}, серийный номер: {serial_number}")
                 return
-        print("Списание не выполнено. Техника не найдена на складе")
+        print(f"Списание не выполнено. Техника не найдена на складе")
 
 
 class DepartmentWarehouse(AbstractEquipmentWarehouse):
@@ -195,4 +205,40 @@ class DepartmentWarehouse(AbstractEquipmentWarehouse):
 
 
 if __name__ == '__main__':
-    pass
+    main_warehouse = MainWarehouse('Основной склад')
+    it_department = DepartmentWarehouse('Подразделение IT')
+    sales_department = DepartmentWarehouse('Отдел продаж')
+    shopping_department = DepartmentWarehouse('Магазин')
+    main_warehouse.show_warehouse_equipment()
+
+    printer_1 = Printer("Canon", 'PIXMA TR8520', 'P001')
+    printer_2 = Printer("Canon", 'PIXMA TR8520', 'P002')
+    main_warehouse.add(printer_1)
+    main_warehouse.show_warehouse_equipment()
+
+    printer_3 = Printer("HP", 'Color Laser 150A', 'P003')
+    printer_4 = Printer("Kyocera", 'ECOSYS P3150DN', 'P004')
+    scanner_1 = Scanner("Epson", 'Perfection V370', 'S001')
+    scanner_2 = Scanner("Canon", 'CanoScan LiDE 300', 'S002')
+    scanner_3 = Scanner("HP", 'ScanJet Pro 2000 s1', 'S003')
+    mfd_1 = MFD("Kyocera", 'ECOSYS M3645DN', 'M001')
+    mfd_2 = MFD("Xerox", 'VersaLink B405', 'M002')
+    equipment = (printer_2, printer_3, printer_4, scanner_1, scanner_2,
+                 scanner_3, mfd_1, mfd_2)
+    main_warehouse.add(equipment)
+    main_warehouse.show_warehouse_equipment()
+
+    main_warehouse.move_equipment(it_department, 'МФУ', 'Kyocera')
+    it_department.show_warehouse_equipment()
+
+    main_warehouse.move_equipment(sales_department, 'Принтер', serial_number='P003')
+    main_warehouse.move_equipment(sales_department, 'Сканер', 'Epson', 'Perfection V370')
+    sales_department.show_warehouse_equipment()
+
+    main_warehouse.move_equipment(shopping_department, 'Принтер', 'Canon', quantity=2)
+    main_warehouse.move_equipment(shopping_department, 'Сканер', 'Canon')
+    shopping_department.show_warehouse_equipment()
+    main_warehouse.show_warehouse_equipment()
+
+    main_warehouse.remove('Сканер', 'HP', 'ScanJet Pro 2000 s1', 'S003')
+    main_warehouse.show_warehouse_equipment()
